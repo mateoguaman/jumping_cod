@@ -9,3 +9,13 @@ The main contents of the repo includes:
 * Additional utilities to inspect robot logs and record data for real-to-sim study.
 
 Please see our [read_the_docs](https://jumping-cod.readthedocs.io/en/latest/) site for detailed documentation.
+
+## CoRL Demo Instructions
+
+To run the evaluation script with jumping boxes, run the following:
+
+```bash
+python -m src.agents.heightmap_prediction.eval --logdir=data/box_policy_20240730/box_distill/model_29.pt --save_traj=False --num_envs=1
+```
+
+Replace `box_policy_20240730` with one of `[box_policy_20240725, box_policy_20240730, box_policy_20240731, box_policy_20240802]`
