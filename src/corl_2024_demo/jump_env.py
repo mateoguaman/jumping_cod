@@ -9,6 +9,7 @@ import ml_collections
 import numpy as np
 import torch
 
+from src.robots import gamepad_reader
 from src.controllers import phase_gait_generator
 from src.controllers import qp_torque_optimizer
 from src.controllers import raibert_swing_leg_controller
@@ -117,9 +118,9 @@ class JumpEnv:
 
     self._init_positions = self._compute_init_positions()
 
-    # if self._use_real_robot:
+    if self._use_real_robot:
     #   robot_class = go1_robot.Go1Robot
-    #   self._gamepad = gamepad_reader.Gamepad()
+      self._gamepad = gamepad_reader.Gamepad()
     # else:
     #   robot_class = go1.Go1
     # self._robot = robot_class(

@@ -1,5 +1,5 @@
 """Evaluate a trained policy."""
-from isaacgym import gymapi, gymutil  ## TODO: Only import if running sim. 
+# from isaacgym import gymapi, gymutil  ## TODO: Only import if running sim. 
 from absl import app
 from absl import flags
 
@@ -10,7 +10,7 @@ import pickle
 import time
 
 import cv2
-from isaacgym.torch_utils import to_torch  # pylint: disable=unused-import
+# from isaacgym.torch_utils import to_torch  # pylint: disable=unused-import
 import numpy as np
 from rsl_rl.runners import OnPolicyRunner
 import torch
@@ -41,6 +41,8 @@ flags.DEFINE_bool("use_contact_sensor", True, "whether to use contact sensor.")
 
 FLAGS = flags.FLAGS
 
+def to_torch(x, dtype=torch.float, device='cuda:0', requires_grad=False):
+    return torch.tensor(x, dtype=dtype, device=device, requires_grad=requires_grad)
 
 def display_depth(depth_array, depth_cutoff=1):
   # Normalize the depth array to 0-255 for visualization
@@ -140,7 +142,7 @@ def _create_terrain(gym, sim, terrain_type="plane", terrain_config=None, device=
   return terrain
 
 def create_sim(sim_conf):
-  # from isaacgym import gymapi, gymutil
+  from isaacgym import gymapi, gymutil
   gym = gymapi.acquire_gym()
   _, sim_device_id = gymutil.parse_device_str(sim_conf.sim_device)
   if sim_conf.show_gui:
