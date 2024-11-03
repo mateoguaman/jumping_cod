@@ -62,7 +62,14 @@ def create_sim(sim_conf):
                        sim_conf.physics_engine, sim_conf.sim_params)
 
   if sim_conf.show_gui:
-    viewer = gym.create_viewer(sim, gymapi.CameraProperties())
+    cam_props = gymapi.CameraProperties()
+    cam_props.width = 1920
+    cam_props.height = 1080
+    viewer = gym.create_viewer(sim, cam_props)
+    cam_pos = gymapi.Vec3(10.0, 10.0, 3.0) #gymapi.Vec3(5.0, 5.0, 3.0)
+    cam_target = gymapi.Vec3(5.0, 5.0, 0.0) #gymapi.Vec3(0.0, 0.0, 0.0)
+    gym.viewer_camera_look_at(viewer, None, cam_pos, cam_target)
+    # viewer = gym.create_viewer(sim, gymapi.CameraProperties())
     gym.subscribe_viewer_keyboard_event(viewer, gymapi.KEY_ESCAPE, "QUIT")
     gym.subscribe_viewer_keyboard_event(viewer, gymapi.KEY_V,
                                         "toggle_viewer_sync")
@@ -468,11 +475,13 @@ class JumpEnv:
     self._init_positions[env_ids] = self._terrain.env_origins[
         self._terrain_levels[env_ids], self._terrain_types[env_ids]]
 
-    sobol_points = self._sobol_engine.draw(len(env_ids))
-    sobol_points = (sobol_points - 0.5) * 2.5  #* 0 + 0.97
-    self._init_positions[env_ids, :2] += to_torch(sobol_points,
-                                                  device=self._device)
+    # sobol_points = self._sobol_engine.draw(len(env_ids))
+    # sobol_points = (sobol_points - 0.5) * 2.5  #* 0 + 0.97
+    # self._init_positions[env_ids, :2] += to_torch(sobol_points,
+    #                                               device=self._device)
 
+    self._init_positions[:, 0] -= 2.
+    self._init_positions[:, 1] += 0.
     self._init_positions[:, 2] += 0.268
     self._robot.update_init_positions(env_ids, self._init_positions[env_ids])
 

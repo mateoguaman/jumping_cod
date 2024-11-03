@@ -23,15 +23,46 @@ def get_terrain_config():
   config.slope_threshold = 0.75
   config.generation_method = GenerationMethod.CURRICULUM
   config.max_init_level = 1
+  # Default params
+#   config.terrain_proportions = dict(
+#       slope_smooth=0.,
+#       slope_rough=0.,
+#       stair=0.4,
+#       obstacles=0.,
+#       stepping_stones=0.4,
+#       gap=0.1,
+#       pit=0.1,
+#   )
+  # Mostly stairs
   config.terrain_proportions = dict(
       slope_smooth=0.,
       slope_rough=0.,
-      stair=0.4,
+      stair=0.9,
       obstacles=0.,
-      stepping_stones=0.4,
+      stepping_stones=0.1,
       gap=0.1,
       pit=0.1,
   )
+#   # Mostly stepping stones
+#   config.terrain_proportions = dict(
+#       slope_smooth=0.,
+#       slope_rough=0.,
+#       stair=0.1,
+#       obstacles=0.,
+#       stepping_stones=0.9,
+#       gap=0.1,
+#       pit=0.1,
+#   )
+#   # Mostly gaps and pits
+#   config.terrain_proportions = dict(
+#       slope_smooth=0.,
+#       slope_rough=0.,
+#       stair=0.1,
+#       obstacles=0.,
+#       stepping_stones=0.1,
+#       gap=0.5,
+#       pit=0.5,
+#   )
   config.randomize_steps = False
   config.randomize_step_width = True
   # Curriculum setup

@@ -184,7 +184,9 @@ class Terrain:
         horizontal_scale=self._config.horizontal_scale)
     additional_trimeshes = None
 
-    if terrain_type == 'slope_smooth':
+    if terrain_type == 'jumping_boxes':
+        jumping_boxes_terrain(terrain, difficulty, platform_size=3.5)
+    elif terrain_type == 'slope_smooth':
       slope = difficulty * 0.4 * 0.
       if np.random.uniform() > 0.5:
         slope *= -1  # Upward or downward slope
@@ -483,3 +485,103 @@ def stepping_stones_terrain(terrain,
     start_y += stone_distance
     stop_y -= stone_distance
     terrain.height_field_raw[start_x:stop_x, start_y:stop_y] = 0
+
+# def jumping_boxes_terrain(terrain, difficulty, platform_size=1.):
+#     """
+#     Generate exercise jumping boxes terrain with gaps between rows
+    
+#     Parameters:
+#         terrain (terrain): the terrain
+#         difficulty (float): controls gap distance and number of rows
+#         platform_size (float): size of the flat platform at the edges [meters]
+#     """
+#     # Convert box dimensions from inches to meters
+#     box_height = 0.3048  # 12 inches
+#     box_width = 0.3556   # 14 inches (width along y-axis)
+#     box_depth = 0.8128   # 32 inches (depth along x-axis)
+    
+#     # Convert gap range from cm to meters
+#     min_gap = 0.25  # 25cm
+#     max_gap = 0.80  # 80cm
+    
+#     # Calculate number of rows based on difficulty (3 to 5 rows)
+#     num_rows = int(3 + difficulty * 2)
+    
+#     # Convert to terrain units
+#     box_height_units = int(box_height / terrain.vertical_scale)
+#     box_width_units = int(box_width / terrain.horizontal_scale)
+#     box_depth_units = int(box_depth / terrain.horizontal_scale)
+#     platform_size_units = int(platform_size / terrain.horizontal_scale)
+    
+#     # Starting position (after initial platform)
+#     center_x = terrain.width // 2
+#     start_y = platform_size_units
+    
+#     # Clear the terrain first
+#     terrain.height_field_raw.fill(0)
+    
+#     for row in range(num_rows):
+#         # Calculate gap size based on difficulty
+#         gap_size = min_gap + (max_gap - min_gap) * difficulty
+#         gap_units = int(gap_size / terrain.horizontal_scale)
+        
+#         # Position for this row's box
+#         box_x1 = center_x - box_depth_units//2
+#         box_x2 = center_x + box_depth_units//2
+        
+#         # Add single wide box
+#         terrain.height_field_raw[box_x1:box_x2, 
+#                                start_y:start_y + box_width_units] = box_height_units
+        
+#         # Move to next row position
+#         start_y += box_width_units + gap_units
+
+def jumping_boxes_terrain(terrain, difficulty, platform_size=1.):
+    """
+    Generate exercise jumping boxes terrain with gaps between rows
+    
+    Parameters:
+        terrain (terrain): the terrain
+        difficulty (float): controls gap distance and number of rows
+        platform_size (float): size of the flat platform at the edges [meters]
+    """
+    # Convert box dimensions from inches to meters
+    box_height = 0.3048  # 12 inches
+    box_width = 0.3556#0.8128   # 32 inches
+    box_depth = 0.8128 #0.3556   # 14 inches
+    
+    # Convert gap range from cm to meters
+    min_gap = 0.25  # 25cm
+    max_gap = 0.80  # 80cm
+    
+    # Calculate number of rows based on difficulty (3 to 5 rows)
+    num_rows = int(3 + difficulty * 2)
+    
+    # Convert to terrain units
+    box_height_units = int(box_height / terrain.vertical_scale)
+    box_width_units = int(box_width / terrain.horizontal_scale)
+    box_depth_units = int(box_depth / terrain.horizontal_scale)
+    platform_size_units = int(platform_size / terrain.horizontal_scale)
+    
+    # Starting position (after initial platform)
+    start_x = platform_size_units
+    center_y = terrain.length // 2
+    
+    # Clear the terrain first
+    terrain.height_field_raw.fill(0)
+    
+    for row in range(num_rows):
+        # Calculate gap size based on difficulty
+        gap_size = min_gap + (max_gap - min_gap) * difficulty
+        gap_units = int(gap_size / terrain.horizontal_scale)
+        
+        # Position for this row's box
+        box_y1 = center_y - box_depth_units//2
+        box_y2 = center_y + box_depth_units//2
+        
+        # Add single wide box
+        terrain.height_field_raw[start_x:start_x + box_width_units, 
+                               box_y1:box_y2] = box_height_units
+        
+        # Move to next row position
+        start_x += box_width_units + gap_units

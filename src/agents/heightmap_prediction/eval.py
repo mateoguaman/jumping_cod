@@ -69,11 +69,12 @@ def main(argv):
     config.env_config.terrain.terrain_proportions = dict(
         slope_smooth=0.,
         slope_rough=0.,
-        stair=1.,
+        stair=0.,
         obstacles=0.,
         stepping_stones=0.,
         gap=0.,
         pit=0.,
+        jumping_boxes=1.,
     )
 
   env = config.env_class(num_envs=FLAGS.num_envs,

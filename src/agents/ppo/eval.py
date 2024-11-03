@@ -100,7 +100,8 @@ def main(argv):
                          device=device,
                          config=config.environment,
                          show_gui=FLAGS.show_gui,
-                         use_real_robot=FLAGS.use_real_robot)
+                         use_real_robot=FLAGS.use_real_robot,
+                         render_track_robot=False)
   env = env_wrappers.RangeNormalize(env)
   if FLAGS.use_real_robot:
     env.robot.state_estimator.use_external_contact_estimator = (

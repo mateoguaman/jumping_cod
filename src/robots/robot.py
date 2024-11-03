@@ -419,14 +419,14 @@ class Robot:
       if self._gym.query_viewer_has_closed(self._viewer):
         sys.exit()
 
-      mean_pos = torch.min(self.base_position_world,
-                           dim=0)[0].cpu().numpy() + np.array([-0., -2., 0.5])
       # mean_pos = torch.min(self.base_position_world,
-      #                      dim=0)[0].cpu().numpy() + np.array([0.5, -1., 0.])
-      target_pos = torch.mean(self.base_position_world, dim=0).cpu().numpy()
-      cam_pos = self._gymapi.Vec3(*mean_pos)
-      cam_target = self._gymapi.Vec3(*target_pos)
-      self._gym.viewer_camera_look_at(self._viewer, None, cam_pos, cam_target)
+      #                      dim=0)[0].cpu().numpy() + np.array([-0., -2., 0.5])
+      # # mean_pos = torch.min(self.base_position_world,
+      # #                      dim=0)[0].cpu().numpy() + np.array([0.5, -1., 0.])
+      # target_pos = torch.mean(self.base_position_world, dim=0).cpu().numpy()
+      # cam_pos = self._gymapi.Vec3(*mean_pos)
+      # cam_target = self._gymapi.Vec3(*target_pos)
+      # self._gym.viewer_camera_look_at(self._viewer, None, cam_pos, cam_target)
 
       if self._device != "cpu":
         self._gym.fetch_results(self._sim, True)
