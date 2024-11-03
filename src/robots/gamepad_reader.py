@@ -18,8 +18,8 @@ MAX_ABS_VAL = 128
 
 class ControllerMode(enum.Enum):
   WALK = 1
-  BOUND = 2
-  PRONK = 3
+  BOUND = 2  ## Boxes
+  PRONK = 3  ## Stairs
   PRONK_TURN = 4
 
 
