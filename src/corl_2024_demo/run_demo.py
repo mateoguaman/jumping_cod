@@ -2,7 +2,6 @@
 from isaacgym import gymapi, gymutil  ## TODO: Only import if running sim. 
 from absl import app
 from absl import flags
-# from absl import logging
 
 import collections
 from datetime import datetime
@@ -260,20 +259,27 @@ def get_camera_config():
   config.orientation_rpy_in_base_frame = [0., 0.52, 0.]
   return config
 
-def rollout_jump(env, policy, heightmap_predictor, gamepad):
-
+def rollout_jump(env, policy, heightmap_predictor, gamepad, image_buffer=None):
   start_mode = gamepad.mode_command
   env.reset()
   policy.reset()
   heightmap_predictor.reset()
-  images = collections.deque(maxlen=5)
+  
+  # Handle different image collection for sim vs real
+  if not FLAGS.use_real_robot:
+    images = collections.deque(maxlen=5)
+  
   with torch.no_grad():
     while True:
-      curr_imgs = []
-      for env_id in range(1):
-        curr_imgs.append(to_torch(env.robot.get_camera_image(env_id, mode="depth"), device="cpu"))
-      curr_imgs = torch.stack(curr_imgs, dim=0)
-      images.append(curr_imgs)
+      if FLAGS.use_real_robot:
+        curr_imgs = image_buffer.last_image
+      else:
+        curr_imgs = []
+        for env_id in range(1):
+          curr_imgs.append(to_torch(env.robot.get_camera_image(env_id, mode="depth"), device="cpu"))
+        curr_imgs = torch.stack(curr_imgs, dim=0)
+        images.append(curr_imgs)
+        curr_imgs = images[0]
 
       proprioceptive_state = env.get_proprioceptive_observation()
       height = heightmap_predictor.forward(
@@ -283,13 +289,13 @@ def rollout_jump(env, policy, heightmap_predictor, gamepad):
               env.gait_generator.desired_contact_state_state_estimation[:, :,
                                                                         None]
           ).reshape((-1, 8)),
-          depth_image=images[0])
+          depth_image=curr_imgs)
       obs = torch.concatenate((proprioceptive_state, height), dim=-1)
       normalized_obs = env.normalize_observ(obs)
 
       action = policy.act_inference(normalized_obs)
       action = action.clip(min=env.action_space[0], max=env.action_space[1])
-      display_depth(curr_imgs[0])
+      display_depth(curr_imgs[0] if not FLAGS.use_real_robot else curr_imgs)
       _, _, reward, done, info = env.step(
             action, base_height_override=-height[:, 10])
       if done.any(
@@ -299,7 +305,46 @@ def rollout_jump(env, policy, heightmap_predictor, gamepad):
 def main(argv):
   del argv  # unused
 
-  # Initialize Robot  ## This gets the default sim so that we can start a simulator instance, without any specific environment specs.
+  # Initialize ROS node for real robot
+  if FLAGS.use_real_robot:
+
+    # Add imports for real robot
+    from sensor_msgs.msg import Image
+    import rospy
+    from cv_bridge import CvBridge
+
+    # Buffer to store depth image embedding for real robot
+    class DepthImageBuffer:
+      """Buffer to store depth image embedding for real robot."""
+      def __init__(self):
+        self._bridge = CvBridge()
+        self._last_image = torch.zeros((1, 48, 60))
+        self._last_image_time = time.time()
+
+      def update_image(self, msg):
+        frame = np.array(self._bridge.imgmsg_to_cv2(msg))
+        self._last_image = torch.from_numpy(frame)[None, ...]
+        self._last_image_time = time.time()
+
+      @property
+      def last_image(self):
+        return self._last_image
+
+      @property
+      def last_image_time(self):
+        return self._last_image_time
+    
+    rospy.init_node("run_demo")
+    image_buffer = DepthImageBuffer()
+    rospy.Subscriber("/camera/depth/cnn_input",
+                     Image,
+                     image_buffer.update_image,
+                     queue_size=1,
+                     tcp_nodelay=True)
+  else:
+    image_buffer = None
+
+  # Initialize Robot
   sim_conf = sim_config.get_config(use_gpu=False,
                                    show_gui=FLAGS.show_gui,
                                    use_real_robot=FLAGS.use_real_robot)
@@ -347,7 +392,7 @@ def main(argv):
         walk_env.update_command(*gamepad.speed_command)
         walk_env.step()
     elif gamepad.mode_command == ControllerMode.BOUND:
-      rollout_jump(boxjump_env, boxjump_policy, boxjump_heightmap_predictor, gamepad)
+      rollout_jump(boxjump_env, boxjump_policy, boxjump_heightmap_predictor, gamepad, image_buffer)
     gamepad.flag_estop()
 
 
